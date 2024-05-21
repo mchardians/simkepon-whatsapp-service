@@ -1,7 +1,7 @@
 import pkg from "whatsapp-web.js";
 import qrcode from "qrcode-terminal";
 
-const { Client, LocalAuth } = pkg;
+const { Client, LocalAuth, MessageMedia } = pkg;
 const wwebVersion = '2.2412.54';
 
 class Whatsapp {
@@ -57,6 +57,35 @@ class Whatsapp {
         } catch (error) {
             console.log(`Error in sendMessage: ${error.message}`);
 
+            throw error;
+        }
+    }
+
+    async sendMedia(number, message, media) {
+        try {
+            let formattedNumber = null;
+
+            if(number.startsWith('0')) {
+                formattedNumber = `${number.replace('0', '62')}@c.us`;
+            }else if(number.startsWith('62')) {
+                formattedNumber = `${number}@c.us`;
+            }
+
+            const isExists = await this.client.isRegisteredUser(formattedNumber);
+
+            if(!isExists) {
+                throw new Error("User is not registered");
+            }
+
+            media = MessageMedia.fromFilePath(media);
+
+            return this.client.sendMessage(formattedNumber, media, {
+                sendMediaAsDocument: true,
+                caption: message
+            });
+        } catch (error) {
+            console.log(`Error in sendMedia: ${error.message}`);
+            
             throw error;
         }
     }

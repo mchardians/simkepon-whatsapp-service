@@ -1,6 +1,6 @@
 import express from "express";
-import router from "./routes/api.mjs";
-import Whatsapp from "./services/whatsapp.mjs";
+import router from "./routes/api.js";
+import Whatsapp from "./services/whatsapp.js";
 
 const app = express();
 const port = 3000;
@@ -8,6 +8,7 @@ const port = 3000;
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(router);
+app.use(express.static("public"));
 
 const whatsapp = new Whatsapp();
 
