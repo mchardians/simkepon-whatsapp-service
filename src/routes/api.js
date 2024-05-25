@@ -12,4 +12,6 @@ router.post("/send-message", WhatsappController.sendMessage);
 
 router.post("/send-media", upload.single("media"), WhatsappController.sendMedia);
 
+router.post("/send-bulk-message", WhatsappController.sendBulkMessage);
+
 export default router;

@@ -89,6 +89,67 @@ class Whatsapp {
             throw error;
         }
     }
+
+    async sendBulkMessage(numbers, message) {
+        try {
+            let responses = [];
+            let formattedNumber = null;
+            let index = 0;
+
+            const promise = new Promise((resolve, reject) => {
+                const interval = setInterval( async () => {
+                    if(numbers[index] === undefined) {
+
+                        clearInterval(interval);
+
+                        return resolve({
+                            "message": message,
+                            "data": responses
+                        });
+                    }
+
+                    if(numbers[index].startsWith('0')) {
+                        formattedNumber = `${numbers[index].replace('0', '62')}@c.us`;
+                    }else if(numbers[index].startsWith('62')) {
+                        formattedNumber = `${numbers[index]}@c.us`;
+                    }
+
+                    const isExists = await this.client.isRegisteredUser(formattedNumber);
+
+                    if(!isExists) {
+                        responses.push({
+                            "number": numbers[index],
+                            "status": "failed",
+                            "isExists": isExists,
+                            "error": "User is not registered"
+                        });
+
+                        return index++;
+                    }
+
+                    const msgResponse = await this.client.sendMessage(formattedNumber, message);
+
+                    responses.push({
+                        "id": msgResponse.id,
+                        "status": "success",
+                        "body": msgResponse.body,
+                        "from": msgResponse.from,
+                        "to": msgResponse.to
+                    });
+
+                    console.log(`Sending message to ${numbers[index]}, isExist: ${isExists}`);
+
+                    index++;
+                }, 10000);
+            });
+            
+            return await promise;
+        } catch (error) {
+            console.log(`Error in sendBulkMessage: ${error.message}`);
+            
+            throw error;
+        }
+    }
 }
 
 export default Whatsapp;

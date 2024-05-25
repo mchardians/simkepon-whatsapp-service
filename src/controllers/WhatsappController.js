@@ -12,7 +12,6 @@ class WhatsappController {
 
     static async sendMessage(req, res) {
         try {
-            console.log(req.body);
             const number = req.query.number || req.body.number;
             const message = req.query.message || req.body.message;
 
@@ -66,6 +65,26 @@ class WhatsappController {
             });
         } finally {
             fs.unlinkSync(req.file.path);
+        }
+    }
+
+    static async sendBulkMessage(req, res) {
+        try {
+            const numbers = req.query.numbers || req.body.numbers;
+            const message = req.query.message || req.body.message;
+
+            const msgResponse = await whatsapp.sendBulkMessage(numbers, message);
+
+            return res.json({
+                status: res.statusCode,
+                success: true,
+                "response": msgResponse
+            });   
+        } catch (error) {
+            return res.json({
+                error: true,
+                message: error.message
+            });
         }
     }
 }
