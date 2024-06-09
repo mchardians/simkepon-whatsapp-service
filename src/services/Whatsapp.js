@@ -1,5 +1,8 @@
 import pkg from "whatsapp-web.js";
 import qrcode from "qrcode-terminal";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const { Client, LocalAuth, MessageMedia } = pkg;
 const wwebVersion = '2.2412.54';
@@ -7,9 +10,18 @@ const wwebVersion = '2.2412.54';
 class Whatsapp {
 
     constructor() {
+        const __filename = fileURLToPath(import.meta.url);
+        const __dirname = path.dirname(__filename);
+        const SESSION_FILE_PATH = path.resolve(__dirname, './auth_sessions');
+
+        if(!fs.existsSync(SESSION_FILE_PATH)) {
+            fs.mkdirSync(SESSION_FILE_PATH, { recursive: true });
+        }
+
         this.client = new Client({
-            authStrategy: new LocalAuth(),
-            dataPath: "./auth_sessions",
+            authStrategy: new LocalAuth({
+                dataPath: SESSION_FILE_PATH,
+            }),
             webVersionCache: {
                 type: 'remote',
                 remotePath: `https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/${wwebVersion}.html`,
@@ -102,10 +114,7 @@ class Whatsapp {
 
                         clearInterval(interval);
 
-                        return resolve({
-                            "message": message,
-                            "data": responses
-                        });
+                        return resolve(responses);
                     }
 
                     if(numbers[index].startsWith('0')) {
@@ -118,10 +127,11 @@ class Whatsapp {
 
                     if(!isExists) {
                         responses.push({
-                            "number": numbers[index],
-                            "status": "failed",
+                            "to": numbers[index],
                             "isExists": isExists,
-                            "error": "User is not registered"
+                            "isSend": false,
+                            "success": false,
+                            "reason": "User is not registered"
                         });
 
                         return index++;
@@ -130,11 +140,12 @@ class Whatsapp {
                     const msgResponse = await this.client.sendMessage(formattedNumber, message);
 
                     responses.push({
-                        "id": msgResponse.id,
-                        "status": "success",
+                        "to": msgResponse.id.remote.user,
+                        "isExists": isExists,
+                        "isSend": true,
+                        "fromMe": msgResponse.fromMe,
                         "body": msgResponse.body,
-                        "from": msgResponse.from,
-                        "to": msgResponse.to
+                        "success": true,
                     });
 
                     console.log(`Sending message to ${numbers[index]}, isExist: ${isExists}`);
@@ -149,6 +160,10 @@ class Whatsapp {
             
             throw error;
         }
+    }
+
+    logout() {
+        return this.client.logout();
     }
 }
 

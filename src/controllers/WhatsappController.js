@@ -7,7 +7,9 @@ class WhatsappController {
     }
 
     static getQR(req, res) {
-        return res.send(whatsapp.getQrCode());
+        return res.json({
+            "qr": whatsapp.getQrCode(),
+        });
     }
 
     static async sendMessage(req, res) {
@@ -18,19 +20,20 @@ class WhatsappController {
             const msgResponse = await whatsapp.sendMessage(number, message);   
 
             return res.json({
-                status: res.statusCode,
-                message: "success",
-                data: {
-                    "id": msgResponse.id,
+                "status": res.statusCode,
+                "message": "OK",
+                "data": {
+                    "to": msgResponse.id.remote.user,
+                    "fromMe": msgResponse.fromMe,
                     "body": msgResponse.body,
-                    "from": msgResponse.from,
-                    "to": msgResponse.to,
+                    "success": true,
                 }
             });
         } catch (error) {
             return res.json({
-                error: true,
-                message: error.message
+                "status": res.statusCode,
+                "message": error.message,
+                "success": false
             });
         }
     }
@@ -48,20 +51,21 @@ class WhatsappController {
             const msgResponse = await whatsapp.sendMedia(number, message, media.path);
 
             return res.json({
-                status: res.statusCode,
-                message: "success",
-                data: {
-                    "id": msgResponse.id,
+                "status": res.statusCode,
+                "message": "OK",
+                "data": {
+                    "to": msgResponse.id.remote.user,
+                    "fromMe": msgResponse.fromMe,
                     "media": media,
                     "body": msgResponse.body,
-                    "from": msgResponse.from,
-                    "to": msgResponse.to,
+                    "success": true,
                 }
             });
         } catch (error) {
             return res.json({
-                error: true,
-                message: error.message
+                "status": res.statusCode,
+                "message": error.message,
+                "success": false
             });
         } finally {
             fs.unlinkSync(req.file.path);
@@ -76,15 +80,29 @@ class WhatsappController {
             const msgResponse = await whatsapp.sendBulkMessage(numbers, message);
 
             return res.json({
-                status: res.statusCode,
-                success: true,
-                "response": msgResponse
+                "status": res.statusCode,
+                "message": "OK",
+                "data": msgResponse
             });   
         } catch (error) {
             return res.json({
-                error: true,
-                message: error.message
+                "status": res.statusCode,
+                "message": error.message,
+                "success": false
             });
+        }
+    }
+
+    static logout(req, res) {
+        try {
+            whatsapp.logout();
+            
+            return res.json({
+                status: res.statusCode,
+                success: true,
+            });
+        } catch (error) {
+            console.log(error);
         }
     }
 }

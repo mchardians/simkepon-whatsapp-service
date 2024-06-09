@@ -7,7 +7,7 @@ const port = 3000;
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(router);
+app.use('/api/v1/', router);
 app.use(express.static("public"));
 
 const whatsapp = new Whatsapp();
