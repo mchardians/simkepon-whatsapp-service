@@ -9,7 +9,7 @@ const wwebVersion = '2.2412.54';
 
 class Whatsapp {
 
-    constructor() {
+    constructor(io) {
         const __filename = fileURLToPath(import.meta.url);
         const __dirname = path.dirname(__filename);
         const SESSION_FILE_PATH = path.resolve(__dirname, './auth_sessions');
@@ -17,6 +17,9 @@ class Whatsapp {
         if(!fs.existsSync(SESSION_FILE_PATH)) {
             fs.mkdirSync(SESSION_FILE_PATH, { recursive: true });
         }
+
+        this.io = io;
+        this.state = "UNPAIRED";
 
         this.client = new Client({
             authStrategy: new LocalAuth({
@@ -34,15 +37,50 @@ class Whatsapp {
 
         this.client.on("qr", qr => {
             this.qr = qr;
+            this.state = "UNPAIRED_IDLE";
 
             qrcode.generate(qr, { small: true });
+
+            io.emit('qr', this.qr);
+            io.emit('change_state', this.getState());
         });
 
-        this.start();
+        this.client.on('authenticated', () => {
+            this.state = "PAIRED";
+
+            io.emit('change_state', this.getState());
+        });
+
+        io.on('connection', (socket) => {
+            console.log('a user connected');
+
+            socket.on('start', () => {
+                this.start();
+
+                console.log("Starting...");
+
+                io.emit('qr', this.qr);
+                io.emit('change_state', this.getState());
+            });
+        
+            socket.on('disconnect', () => {
+              console.log('user disconnected');
+            });
+
+            socket.on('logout', async() => {
+                console.log("Signed out and stopped...");
+                await this.logout();
+                await this.client.destroy();
+            });
+        });
     }
 
     getQrCode() {
         return this.qr;
+    }
+
+    getState() {
+        return this.state;
     }
 
     start() {
