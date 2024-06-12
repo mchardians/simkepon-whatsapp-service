@@ -22,13 +22,16 @@ class Whatsapp {
         this.state = "UNPAIRED";
 
         this.client = new Client({
+            puppeteer: {
+                args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            },
             authStrategy: new LocalAuth({
                 dataPath: SESSION_FILE_PATH,
             }),
             webVersionCache: {
                 type: 'remote',
                 remotePath: `https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/${wwebVersion}.html`,
-            } 
+            }, 
         });
 
         this.client.on('ready', () => {
@@ -200,8 +203,22 @@ class Whatsapp {
         }
     }
 
-    logout() {
-        return this.client.logout();
+    async logout() {
+        try {
+            await this.client.logout();
+            await this.client.destroy();
+
+            return true;
+        }catch(error) {
+            console.log(`Error in logout: ${error.message}`);
+            throw error;
+        }finally {
+            const __filename = fileURLToPath(import.meta.url);
+            const __dirname = path.dirname(__filename);
+            await fs.promises.rm(path.resolve(__dirname, './public/temp'), { recursive: true, force: true });
+
+            console.log("Logged out");
+        }
     }
 }
 

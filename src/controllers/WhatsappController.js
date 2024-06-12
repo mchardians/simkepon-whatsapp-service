@@ -68,7 +68,7 @@ class WhatsappController {
                 "success": false
             });
         } finally {
-            fs.unlinkSync(req.file.path);
+            await fs.promises.unlink(req.file.path);
         }
     }
 
@@ -93,16 +93,20 @@ class WhatsappController {
         }
     }
 
-    static logout(req, res) {
+    static async logout(req, res) {
         try {
-            whatsapp.logout();
+            const result = await whatsapp.logout();
             
             return res.json({
                 status: res.statusCode,
-                success: true,
+                success: result,
             });
         } catch (error) {
-            console.log(error);
+            return res.json({
+                "status": res.statusCode,
+                "message": error.message,
+                "success": false
+            });
         }
     }
 }
