@@ -3,7 +3,9 @@ import fs from "fs";
 
 class WhatsappController {
     static index(req, res) {
-        return res.send("Hello World!");
+        return res.json({
+            "message": "Hello World!"
+        });
     }
 
     static getQR(req, res) {

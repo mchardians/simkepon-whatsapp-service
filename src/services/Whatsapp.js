@@ -5,7 +5,6 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const { Client, LocalAuth, MessageMedia } = pkg;
-const wwebVersion = '2.2412.54';
 
 class Whatsapp {
 
@@ -29,8 +28,7 @@ class Whatsapp {
                 dataPath: SESSION_FILE_PATH,
             }),
             webVersionCache: {
-                type: 'remote',
-                remotePath: `https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/${wwebVersion}.html`,
+                type: 'none',
             }, 
         });
 
@@ -149,7 +147,7 @@ class Whatsapp {
             let formattedNumber = null;
             let index = 0;
 
-            const promise = new Promise((resolve, reject) => {
+            const promise = new Promise((resolve) => {
                 const interval = setInterval( async () => {
                     if(numbers[index] === undefined) {
 

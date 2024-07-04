@@ -11,7 +11,7 @@ const io = new Server(server, {
     cors: {
         origin: '*'
     }
-})
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -20,6 +20,6 @@ app.use(express.static("public"));
 
 const whatsapp = new Whatsapp(io);
 
-server.listen(port, () => console.log(`App listening on http://127.0.0.1:${port}`));
+server.listen(port, () => console.log(`App listening on http://localhost:${port}`));
 
 export { whatsapp }
