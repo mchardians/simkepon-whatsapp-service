@@ -96,6 +96,8 @@ class Whatsapp {
                 formattedNumber = `${number.replace('0', '62')}@c.us`;
             }else if(number.startsWith('62')) {
                 formattedNumber = `${number}@c.us`;
+            }else {
+                return new Error("Number is not valid: Skipped");
             }
 
             const isExists = await this.client.isRegisteredUser(formattedNumber);
@@ -120,6 +122,8 @@ class Whatsapp {
                 formattedNumber = `${number.replace('0', '62')}@c.us`;
             }else if(number.startsWith('62')) {
                 formattedNumber = `${number}@c.us`;
+            }else {
+                return new Error("Number is not valid: Skipped");
             }
 
             const isExists = await this.client.isRegisteredUser(formattedNumber);
@@ -141,7 +145,7 @@ class Whatsapp {
         }
     }
 
-    async sendBulkMessage(numbers, message) {
+    async sendBulkMessage(numbers, messages) {
         try {
             let responses = [];
             let formattedNumber = null;
@@ -160,6 +164,9 @@ class Whatsapp {
                         formattedNumber = `${numbers[index].replace('0', '62')}@c.us`;
                     }else if(numbers[index].startsWith('62')) {
                         formattedNumber = `${numbers[index]}@c.us`;
+                    }else {
+                        console.log("Number is not valid: Skipped");
+                        return index++;
                     }
 
                     const isExists = await this.client.isRegisteredUser(formattedNumber);
@@ -176,7 +183,7 @@ class Whatsapp {
                         return index++;
                     }
 
-                    const msgResponse = await this.client.sendMessage(formattedNumber, message);
+                    const msgResponse = await this.client.sendMessage(formattedNumber, messages[index]);
 
                     responses.push({
                         "to": msgResponse.id.remote.user,

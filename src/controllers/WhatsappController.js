@@ -77,9 +77,9 @@ class WhatsappController {
     static async sendBulkMessage(req, res) {
         try {
             const numbers = req.query.numbers || req.body.numbers;
-            const message = req.query.message || req.body.message;
+            const messages = req.query.messages || req.body.messages;
 
-            const msgResponse = await whatsapp.sendBulkMessage(numbers, message);
+            const msgResponse = await whatsapp.sendBulkMessage(numbers, messages);
 
             return res.json({
                 "status": res.statusCode,
